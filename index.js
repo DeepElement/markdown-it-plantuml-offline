@@ -2,29 +2,46 @@
 //
 'use strict';
 
+const fs = require('fs');
+var tmp = require('tmp');
+const execSync = require('child_process').execSync;
+const imageDataURI = require('image-data-uri');
+
 module.exports = function umlPlugin(md, options) {
 
   function generateSourceDefault(umlCode) {
-    var deflate = require('./lib/deflate.js');
-    var zippedCode =
-      deflate.encode64(deflate.zip_deflate('@startuml\n' + umlCode + '\n@enduml', 9));
-    return 'http://www.plantuml.com/plantuml/svg/' + zippedCode;
+
+    var outputFile = tmp.fileSync();
+    var inputFile = tmp.fileSync();
+
+    fs.writeFileSync(inputFile.name, umlCode, 'utf8');
+    const cmd = `puml generate ${inputFile.name} -o ${outputFile.name}`;
+
+    execSync(cmd);
+
+    var dataBuffer = fs.readFileSync(outputFile.name);
+    const dataUri = imageDataURI.encode(dataBuffer, 'PNG');
+
+    inputFile.removeCallback();
+    outputFile.removeCallback();
+
+    return dataUri;
   }
 
   options = options || {};
 
   var openMarker = options.openMarker || '@startuml',
-      openChar = openMarker.charCodeAt(0),
-      closeMarker = options.closeMarker || '@enduml',
-      closeChar = closeMarker.charCodeAt(0),
-      generateSource = options.generateSource || generateSourceDefault,
-      render = options.render || md.renderer.rules.image;
+    openChar = openMarker.charCodeAt(0),
+    closeMarker = options.closeMarker || '@enduml',
+    closeChar = closeMarker.charCodeAt(0),
+    generateSource = options.generateSource || generateSourceDefault,
+    render = options.render || md.renderer.rules.image;
 
   function uml(state, startLine, endLine, silent) {
     var nextLine, markup, params, token, i,
-        autoClosed = false,
-        start = state.bMarks[startLine] + state.tShift[startLine],
-        max = state.eMarks[startLine];
+      autoClosed = false,
+      start = state.bMarks[startLine] + state.tShift[startLine],
+      max = state.eMarks[startLine];
 
     // Check out the first character quickly,
     // this should filter out most of non-uml blocks
@@ -108,11 +125,14 @@ module.exports = function umlPlugin(md, options) {
 
     token = state.push('uml_diagram', 'img', 0);
     // alt is constructed from children. No point in populating it here.
-    token.attrs = [ [ 'src', generateSource(contents) ], [ 'alt', '' ] ];
+    token.attrs = [
+      ['src', generateSource(contents)],
+      ['alt', '']
+    ];
     token.block = true;
     token.children = altToken;
     token.info = params;
-    token.map = [ startLine, nextLine ];
+    token.map = [startLine, nextLine];
     token.markup = markup;
 
     state.line = nextLine + (autoClosed ? 1 : 0);
@@ -121,7 +141,7 @@ module.exports = function umlPlugin(md, options) {
   }
 
   md.block.ruler.before('fence', 'uml_diagram', uml, {
-    alt: [ 'paragraph', 'reference', 'blockquote', 'list' ]
+    alt: ['paragraph', 'reference', 'blockquote', 'list']
   });
   md.renderer.rules.uml_diagram = render;
 };

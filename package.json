@@ -1,9 +1,9 @@
 {
-  "author": "Gerardo Munguia <gerardomunguiahoyo@gmail.com>",
-  "name": "markdown-it-plantuml",
+  "author": "Todd Morrison <todd@deepelement.com>",
+  "name": "markdown-it-plantuml-offline",
   "version": "1.0.0",
-  "description": "Plugin to create block-level uml diagrams for markdown-it markdown parser",
-  "repository": "gmunguia/markdown-it-plantuml",
+  "description": "Plugin to create block-level uml diagrams for markdown-it markdown parser by using the local Java-based PlantUML CLI (no remote server posts)",
+  "repository": "deepelement/markdown-it-plantuml-offline",
   "license": "MIT",
   "scripts": {
     "test": "mocha test/*.js"
@@ -20,5 +20,11 @@
     "markdown-it": "8.4.0",
     "markdown-it-testgen": "0.1.4",
     "mocha": "4.0.1"
+  },
+  "dependencies": {
+    "base64-img": "^1.0.4",
+    "image-data-uri": "^1.0.1",
+    "node-plantuml": "^0.6.2",
+    "tmp": "^0.0.33"
   }
 }
