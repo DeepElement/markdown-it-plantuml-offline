@@ -4,8 +4,8 @@
 
 const fs = require('fs');
 var tmp = require('tmp');
-const execSync = require('child_process').execSync;
 const imageDataURI = require('image-data-uri');
+const plantuml = require('node-plantuml');
 
 module.exports = function umlPlugin(md, options) {
 
@@ -15,9 +15,9 @@ module.exports = function umlPlugin(md, options) {
     var inputFile = tmp.fileSync();
 
     fs.writeFileSync(inputFile.name, umlCode, 'utf8');
-    const cmd = `puml generate ${inputFile.name} -o ${outputFile.name}`;
 
-    execSync(cmd);
+    var gen = plantuml.generate(inputFile.name);
+    gen.out.pipe(fs.createWriteStream(outputFile.name));
 
     var dataBuffer = fs.readFileSync(outputFile.name);
     const dataUri = imageDataURI.encode(dataBuffer, 'PNG');
