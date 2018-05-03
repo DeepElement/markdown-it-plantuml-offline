@@ -1,7 +1,7 @@
 {
   "author": "Todd Morrison <todd@deepelement.com>",
   "name": "markdown-it-plantuml-offline",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Plugin to create block-level uml diagrams for markdown-it markdown parser by using the local Java-based PlantUML CLI (no remote server posts)",
   "repository": "deepelement/markdown-it-plantuml-offline",
   "license": "MIT",
